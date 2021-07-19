@@ -1,0 +1,49 @@
+---
+version: '3.5'
+
+services:
+  go-service:
+    build:
+      dockerfile: Dockerfile
+      context: go-service
+    environment:
+      - JAEGER_SERVICE_NAME=go-service
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      - JAEGER_REPORTER_LOG_SPANS=true
+    ports:
+      - 8080:8080
+    container_name: go-service
+    hostname: go-service
+    command: sh -c './server'
+
+  py-service:
+    build:
+      dockerfile: Dockerfile
+      context: py-service
+    environment:
+      - JAEGER_SERVICE_NAME=py-service
+      - JAEGER_AGENT_HOST=jaeger
+      - JAEGER_AGENT_PORT=6831
+      - JAEGER_REPORTER_LOG_SPANS=true
+    ports:
+      - 8081:8081
+    container_name: py-service
+    hostname: py-service
+    command: sh -c '/api/run.sh'
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.24
+    container_name: jaeger
+    hostname: jaeger
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=9411
+    ports:
+      - 5775:5775/udp
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 14268:14268
+      - 14250:14250
+      - 9411:9411
